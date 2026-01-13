@@ -1,0 +1,27 @@
+{
+  "name": "librarymanagementsystem",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/ajay10110/library-management#readme",
+  "bugs": {
+    "url": "https://github.com/ajay10110/library-management/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajay10110/library-management.git"
+  },
+  "license": "ISC",
+  "author": "Ajay Matasugur",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
