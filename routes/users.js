@@ -1,25 +1,7 @@
-const express = require("express");
+const express = require('express');
+const {users} = require("../data/users.json")
 
-// const {users} = require("./data/users.json")
-
-// importing routers
-const usersRouter = require('./routes/users');
-const booksRouter = require('./routes/books');
-
-const app = express();
-
-const PORT = 8081;
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: "Home Page :-)"
-  });
-});
-
-app.use("/users", usersRouter);
-app.use("/books", booksRouter);
+const router = express.Router();
 /**
  * Route: /users
  * Method: GET
@@ -29,7 +11,7 @@ app.use("/books", booksRouter);
  * 
  */
 
-app.get('/users', (req, res) => {
+router.get('/', (req, res) => {
     res.status(200).json({
         success: true,
         data: users
@@ -44,7 +26,7 @@ app.get('/users', (req, res) => {
  * Parameters: None
  * 
  */
-app.get('/users/:id', (req, res) => {
+router.get('/:id', (req, res) => {
 
     const {id}  = req.params;
     const user = users.find((each)=> each.id === id);
@@ -70,7 +52,7 @@ app.get('/users/:id', (req, res) => {
  * Parameters: None
  * 
  */
-app.post('/users', (req, res) => {
+router.post('/', (req, res) => {
         
         // "id": "4",
         // "name": "Jane",
@@ -126,7 +108,7 @@ app.post('/users', (req, res) => {
  * Parameters: ID
  * 
  */
-app.put('/users/:id', (req, res) => {
+router.put('/:id', (req, res) => {
     const {id}  = req.params;
     const {data} = req.body;
 
@@ -169,7 +151,7 @@ app.put('/users/:id', (req, res) => {
  * Parameters: ID
  * 
  */
-app.delete('/users/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     const {id}  = req.params;
 
     // check if user exists
@@ -196,29 +178,70 @@ app.delete('/users/:id', (req, res) => {
     });
 });
 
+/**
+ * Route: /books/subscriptions-details/:id
+ * Method: GET
+ * Description: Get all subscription details of a book by their ID
+ * Access: Public
+ * Parameters: None
+ * 
+ */
+router.get('/subscriptions-details/:id', (req, res) => {
 
+    const {id}  = req.params;
+    const user = users.find((each)=> each.id === id);
+    if(!user){
+        return res.status(404).json({
+            success: false,
+            message: `User not found for id ${id}`
+        });
+    }
 
+    const getDateInDays = (data = "") => {
+        let date;
+        if(data){
+            date = new Date(data);
+        }
+        else{
+            date = new Date();
+        }
+        let days = Math.floor(date / (1000 * 60 * 60 * 24));
+        return days;
+    }
 
+    const subscriptionType = (date) => {
+        if(user.subscriptionType === "Basic"){
+            date = date + 90;
+        }
+        else if(user.subscriptionType === "Standard"){
+            date = date + 180;
+        }
+        else if(user.subscriptionType === "Premium"){
+            date = date + 365;
+        }
+        return date;
+    }
 
+    // Subscription Expiration Calculation
+    // January 1, 1970 UTC // millisconds
 
+    let returnDate = getDateInDays(user.returnDate);
+    let currentDate = getDateInDays();
+    let subscriptionDate = getDateInDays(user.subscriptionDate);
+    let subscriptionExpiration = subscriptionType(subscriptionDate);
 
+    const data = {
+        ...user,
+        subscriptionExpired: subscriptionExpiration < currentDate,
+        subscriptionDaysLeft: subscriptionExpiration - currentDate,
+        daysLeftForReturn: returnDate - currentDate,
+        returnDate: returnDate < currentDate ? "Book return date has passed" : returnDate,
+        fine: returnDate < currentDate ? subscriptionExpiration <= currentDate ? 200 : 100 : 0
+    }
 
-
-
-
-
-
-
-
-
-
-// app.all('*', (req, res) => {
-//     res.status(500).json({
-//         message: "Not Built yet :-("
-//     });
-// });
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
+    res.status(200).json({
+        success: true,
+        data: data
+    });
 });
-
+module.exports = router;
