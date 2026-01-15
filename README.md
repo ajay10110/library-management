@@ -5,7 +5,7 @@
 # Routes and the Endpoints
 
 ## /users
-GET:GET all the list of users in the system
+GET: GET all the list of users in the system
 POST: Create/Register a new user
 
 ## /users(id)
@@ -47,6 +47,6 @@ npm init
 npm i express
 npm i nodemon --save-dev
 
-npm run dev
+npm run dev --> To start the application
 
 To restore  node modules and package-lock.json --> npm i/npm install    
